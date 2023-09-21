@@ -1,81 +1,60 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-
+using System.Text.RegularExpressions;
 
 class Program
 {
     static void Main()
     {
-        Console.Write("Inserisci una targa nel formato 'AA000AA': ");
-        string targa = Console.ReadLine().ToUpper();
+        Console.Write("Inserisci una targa nel formato AA000AA: ");
+        string inputTarga = Console.ReadLine();
 
-        int valoreTarga = CalcolaValoreTarga(targa);
-
-        Console.WriteLine($"Il valore della targa {targa} è: {valoreTarga}");
+        if (IsValidTargaFormat(inputTarga))
+        {
+            string targaConvertita = ConvertiTarga(inputTarga);
+            int valoreTarga = CalcolaValoreTarga(targaConvertita);
+            Console.WriteLine($"Il valore della targa convertita {targaConvertita} è: {valoreTarga}");
+        }
+        else
+        {
+            Console.WriteLine("Il formato della targa non è valido.");
+        }
         Console.ReadKey();
+    }
+
+    static bool IsValidTargaFormat(string targa)
+    {
+        string pattern = "^[A-Z]{2}\\d{3}[A-Z]{2}$";
+        return Regex.IsMatch(targa, pattern);
+    }
+
+    static string ConvertiTarga(string targa)
+    {
+        // Converti la targa nel formato "AAAA000".
+        return $"{targa.Substring(0, 2)}{targa.Substring(5, 2)}{targa.Substring(2, 3)}";
     }
 
     static int CalcolaValoreTarga(string targa)
     {
-        if (targa.Length != 7)
-        {
-            Console.WriteLine("Formato di targa non valido. Assicurati che sia nel formato 'AA000AA'.");
-            return -1; // Valore di errore
-        }
-
         int valore = 0;
 
         for (int i = 0; i < targa.Length; i++)
         {
-            char carattere = targa[i];
-
-            if (i < 2)
+            if (char.IsDigit(targa[i]))
             {
-                if (char.IsLetter(carattere))
-                {
-                    valore = valore * 26 + ((int)carattere - (int)'A');
-                }
-                else
-                {
-                    Console.WriteLine("Formato di targa non valido. Assicurati che le prime due posizioni siano lettere.");
-                    return -1; // Valore di errore
-                }
+                valore *= 10; // Sistema numerico posizionale.
+                valore += targa[i] - '0'; // Converto il carattere numerico in un valore numerico.
             }
-            else if (i >= 2 && i < 5)
+            else if (char.IsLetter(targa[i]))
             {
-                if (char.IsDigit(carattere))
-                {
-                    valore = valore * 10 + ((int)carattere - (int)'0');
-                }
-                else
-                {
-                    Console.WriteLine("Formato di targa non valido. Assicurati che le tre cifre centrali siano numeri.");
-                    return -1; // Valore di errore
-                }
-            }
-            else if (i >= 5 && i < 7)
-            {
-                if (char.IsLetter(carattere))
-                {
-                    valore = valore * 26 + ((int)carattere - (int)'A');
-                }
-                else
-                {
-                    Console.WriteLine("Formato di targa non valido. Assicurati che le ultime due posizioni siano lettere.");
-                    return -1; // Valore di errore
-                }
+                valore *= 26; // Ci sono 26 lettere nell'alfabeto inglese.
+                valore += char.ToUpper(targa[i]) - 'A'; // Converto la lettera in maiuscolo e la trasformo in un valore da 0 a 25.
             }
         }
 
         return valore;
     }
 }
-
-
-
-
-
-
